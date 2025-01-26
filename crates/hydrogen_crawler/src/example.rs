@@ -1,8 +1,8 @@
 use hydrogen_common::models::RawHtmlData;
 
+use chrono::Utc;
 use reqwest::{Client, header};
 use std::error::Error;
-use chrono::Utc;
 
 pub async fn crawler(url: &str) -> Result<RawHtmlData, Box<dyn Error>> {
     let client = Client::builder()
@@ -49,7 +49,7 @@ pub async fn crawler(url: &str) -> Result<RawHtmlData, Box<dyn Error>> {
     }
 
     let bytes = response.bytes().await?;
-    let html: String = String::from_utf8_lossy(&bytes).to_string(); 
+    let html: String = String::from_utf8_lossy(&bytes).to_string();
 
     let now = Utc::now();
     let timestamp = now.timestamp() as u64;
@@ -58,7 +58,6 @@ pub async fn crawler(url: &str) -> Result<RawHtmlData, Box<dyn Error>> {
         raw_html: html,
         timestamp,
     };
-
 
     Ok(raw_data)
 }

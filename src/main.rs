@@ -22,7 +22,6 @@
 
 //}
 
-use hydrogen_common::models::RawHtmlData;
 use hydrogen_common::ring_buffer::LockFreeRingBuffer;
 use hydrogen_crawler::example::crawler;
 use hydrogen_ingestion::ingestor::ingest_data;
