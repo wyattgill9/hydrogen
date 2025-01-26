@@ -1,15 +1,1 @@
-use ingestion::ingestor;
-use processing::processor;
-use stalker::example;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // const ADDR: &str = "127.0.0.1:8080";
-    // ingestion::ingestor::ingest(ADDR).await?;
-    // Ok(())
-
-    let html = example::crawler().await?;
-    // let data = processor::parser::parse_html(html);
-    // processor::process_html_data(data);
-    Ok(())
-}

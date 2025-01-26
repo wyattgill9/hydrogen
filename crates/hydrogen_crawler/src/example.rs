@@ -1,8 +1,10 @@
+use hydrogen_common::models::RawHtmlData;
+
 use reqwest::{Client, header};
 use std::error::Error;
+use chrono::Utc;
 
-#[tokio::main]
-pub async fn crawler(url: &str) -> Result<String, Box<dyn Error>> {
+pub async fn crawler(url: &str) -> Result<RawHtmlData, Box<dyn Error>> {
     let client = Client::builder()
         .timeout(std::time::Duration::from_secs(30))
         .gzip(true)
@@ -12,7 +14,7 @@ pub async fn crawler(url: &str) -> Result<String, Box<dyn Error>> {
         .pool_max_idle_per_host(5)
         .tcp_keepalive(std::time::Duration::from_secs(60))
         .build()?;
-    
+
     let mut headers = header::HeaderMap::new();
     headers.insert(
         header::ACCEPT_ENCODING,
@@ -29,7 +31,7 @@ pub async fn crawler(url: &str) -> Result<String, Box<dyn Error>> {
         ),
     );
 
-    let response = match client.get(&*url).headers(headers.clone()).send().await {
+    let response = match client.get(url).headers(headers.clone()).send().await {
         Ok(resp) => resp,
         Err(e) => {
             eprintln!("Initial request failed: {}", e);
@@ -41,11 +43,22 @@ pub async fn crawler(url: &str) -> Result<String, Box<dyn Error>> {
             http1_client.get(url).headers(headers).send().await?
         }
     };
-    
+
     if !response.status().is_success() {
         return Err(format!("Request failed with status: {}", response.status()).into());
     }
-    
+
     let bytes = response.bytes().await?;
-    Ok(String::from_utf8_lossy(&bytes).to_string())
+    let html: String = String::from_utf8_lossy(&bytes).to_string(); 
+
+    let now = Utc::now();
+    let timestamp = now.timestamp() as u64;
+    let raw_data = RawHtmlData {
+        source_url: url.to_string(),
+        raw_html: html,
+        timestamp,
+    };
+
+
+    Ok(raw_data)
 }

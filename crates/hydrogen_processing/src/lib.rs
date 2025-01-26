@@ -1,2 +1,3 @@
-pub mod filters;
-pub mod parser;
+pub mod cleaning;
+pub mod reduction;
+pub mod transform;

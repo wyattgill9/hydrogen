@@ -394,9 +394,9 @@ checksum = "7d71d3574edd2771538b901e6549113b4006ece66150fb69c0fb6d9a2adae946"
 name = "hydrogen"
 version = "0.1.0"
 dependencies = [
+ "hydrogen_common",
  "hydrogen_crawler",
  "hydrogen_ingestion",
- "hydrogen_processing",
  "hydrogen_transform",
  "tokio",
 ]
@@ -412,6 +412,8 @@ dependencies = [
 name = "hydrogen_crawler"
 version = "0.1.0"
 dependencies = [
+ "chrono",
+ "hydrogen_common",
  "reqwest",
  "tokio",
 ]
@@ -423,13 +425,6 @@ dependencies = [
  "chrono",
  "hydrogen_common",
  "tokio",
-]
-
-[[package]]
-name = "hydrogen_processing"
-version = "0.1.0"
-dependencies = [
- "hydrogen_common",
 ]
 
 [[package]]

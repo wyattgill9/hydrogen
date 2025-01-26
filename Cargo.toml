@@ -5,18 +5,18 @@ edition = "2024"
 
 [dependencies]
 hydrogen_ingestion = { path = "crates/hydrogen_ingestion" }
-hydrogen_transform = { path = "crates/hydrogen_transform" }
+hydrogen_transform = { path = "crates/hydrogen_processing" }
 hydrogen_crawler = { path = "crates/hydrogen_crawler" }
-hydrogen_processing = { path = "crates/hydrogen_processing" }
-tokio = { version = "1.0", features = ["full"] }
+hydrogen_common = { path = "crates/hydrogen_common" }
+
+tokio = { version = "1.43.0", features = ["full"] }
 
 [workspace]
 members = [ 
     "crates/hydrogen_common", 
     "crates/hydrogen_ingestion",
-    "crates/hydrogen_transform",
-    "crates/hydrogen_crawler", 
     "crates/hydrogen_processing",
+    "crates/hydrogen_crawler", 
 ]
 
 

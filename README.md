@@ -4,7 +4,8 @@ This engine will be developed in a few phases:
 
 1. 
 
-pipeline: single threaded, html only, Ingestion, dersialization and parsing, preprocesing, transforming the data, serializing the data, and sinking it back to a db
+pipeline: , html only, Ingestion, dersialization and parsing, preprocesing { transforming, cleanubg, reduction}, processuibg the data,
+serializing the data, and sinking it back to a db
 
 crawler nodes: grab html from domain
 
@@ -13,6 +14,7 @@ crawler nodes: grab html from domain
 Ingestion
 Deserialization & Parsing
 Preprocessing
+
 Partitioning & Routing
 Transformation
 State Management
@@ -21,6 +23,9 @@ Windowing & Aggregation
 Error Handling
 Serialization
 Sink (Output)
+
+
+
 Monitoring & Metrics
 Scaling & Load Balancing
 Fault Tolerance
