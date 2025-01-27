@@ -397,7 +397,7 @@ dependencies = [
  "hydrogen_common",
  "hydrogen_crawler",
  "hydrogen_ingestion",
- "hydrogen_transform",
+ "hydrogen_processing",
  "tokio",
 ]
 
@@ -428,7 +428,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "hydrogen_transform"
+name = "hydrogen_processing"
 version = "0.1.0"
 dependencies = [
  "hydrogen_common",

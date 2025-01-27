@@ -1,3 +1,3 @@
-pub mod cleaning;
+pub mod cleaner;
 pub mod reduction;
 pub mod transform;

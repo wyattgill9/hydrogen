@@ -1,6 +1,5 @@
 use hydrogen_common::models::RawHtmlData;
 
-pub fn ingest_data(raw_data: RawHtmlData) {
-    println!("Ingested data from URL: {}", raw_data.source_url);
-    println!("{}", raw_data.raw_html);
+pub fn ingest_data(raw_data: RawHtmlData) -> Result<RawHtmlData, Box<dyn std::error::Error>> {
+    Ok(raw_data)
 }
