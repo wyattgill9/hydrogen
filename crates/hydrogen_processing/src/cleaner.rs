@@ -7,6 +7,8 @@ pub async fn clean_data(raw_data: RawHtmlData) -> Result<CleanedData, Box<dyn st
 
     cleaned_html = remove_tags(&cleaned_html);
 
+    cleaned_html = remove_css(&cleaned_html);
+
     cleaned_html = clean_whitespace(&cleaned_html);
 
     println!("Cleaned HTML: {}", cleaned_html);
@@ -56,6 +58,29 @@ fn remove_tags(html: &str) -> String {
             '>' => inside_tag = false,
             _ => {
                 if !inside_tag {
+                    result.push(c);
+                }
+            }
+        }
+    }
+
+    result
+}
+
+fn remove_css(html: &str) -> String {
+    let mut result = String::with_capacity(html.len());
+    let mut brace_depth = 0;
+
+    for c in html.chars() {
+        match c {
+            '{' => brace_depth += 1,
+            '}' => {
+                if brace_depth > 0 {
+                    brace_depth -= 1;
+                }
+            }
+            _ => {
+                if brace_depth == 0 {
                     result.push(c);
                 }
             }
