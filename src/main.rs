@@ -22,21 +22,20 @@
 
 //}
 
+use hydrogen_common::models::{CleanedData, RawHtmlData};
 use hydrogen_common::ring_buffer::LockFreeRingBuffer;
 use hydrogen_crawler::example::crawler;
 use hydrogen_ingestion::ingestor::ingest_data;
 use hydrogen_processing::*;
-use hydrogen_common::models::{RawHtmlData, CleanedData};
 
 use std::sync::Arc;
 use tokio::time::{Duration, sleep};
 use tokio::{self, task};
 
-
 #[tokio::main]
 async fn main() {
     let raw_buffer = Arc::new(LockFreeRingBuffer::new(100));
-    
+
     // Crawler (Producer)
     let crawler_buffer = Arc::clone(&raw_buffer);
     let crawler_handle = task::spawn(async move {
@@ -57,8 +56,8 @@ async fn main() {
         loop {
             if let Some(raw_data) = ingester_buffer.pop() {
                 let ingested_data = ingest_data(raw_data);
-                    if ingester_buffer.push(ingested_data.unwrap()).is_err() {
-                        eprintln!("Buffer is full, dropping processed data");
+                if ingester_buffer.push(ingested_data.unwrap()).is_err() {
+                    eprintln!("Buffer is full, dropping processed data");
                 }
             } else {
                 sleep(Duration::from_millis(500)).await;

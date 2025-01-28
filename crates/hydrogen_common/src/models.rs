@@ -22,3 +22,12 @@ pub struct CleanedData {
     pub source_url: String,
     pub cleaned_html: String,
 }
+
+impl Default for CleanedData {
+    fn default() -> CleanedData {
+        CleanedData {
+            source_url: "".to_string(),
+            cleaned_html: "".to_string(),
+        }
+    }
+}
