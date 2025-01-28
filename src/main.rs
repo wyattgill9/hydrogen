@@ -26,6 +26,7 @@ use hydrogen_common::ring_buffer::LockFreeRingBuffer;
 use hydrogen_crawler::example::crawler;
 use hydrogen_ingestion::ingestor::ingest_data;
 use hydrogen_processing::*;
+use hydrogen_common::models::{RawHtmlData, CleanedData};
 
 use std::sync::Arc;
 use tokio::time::{Duration, sleep};
@@ -72,7 +73,7 @@ async fn main() {
         loop {
             if let Some(html_data) = processing_buffer.pop() {
                 match cleaner::clean_data(html_data).await {
-                    Ok(()) => println!("Successfully cleaned data"),
+                    Ok(CleanedData) => println!("Successfully cleaned data"),
                     Err(e) => eprintln!("Processing error: {}", e),
                 }
             } else {

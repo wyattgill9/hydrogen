@@ -16,3 +16,9 @@ impl Default for RawHtmlData {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CleanedData {
+    pub source_url: String,
+    pub cleaned_html: String,
+}
