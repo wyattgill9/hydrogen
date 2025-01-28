@@ -1,13 +1,12 @@
 use hydrogen_common::models::{CleanedData, RawHtmlData};
+use regex::Regex;
 
 pub async fn clean_data(raw_data: RawHtmlData) -> Result<CleanedData, Box<dyn std::error::Error>> {
     let mut cleaned_html = raw_data.raw_html;
 
-    cleaned_html = remove_comments(&cleaned_html);
+    cleaned_html = remove_tags_and_comments(&cleaned_html);
 
-    cleaned_html = remove_tags(&cleaned_html);
-
-    cleaned_html = remove_css(&cleaned_html);
+    cleaned_html = isolate_content(&cleaned_html);
 
     cleaned_html = clean_whitespace(&cleaned_html);
 
@@ -19,89 +18,33 @@ pub async fn clean_data(raw_data: RawHtmlData) -> Result<CleanedData, Box<dyn st
     })
 }
 
-fn remove_comments(html: &str) -> String {
-    let mut result = String::with_capacity(html.len());
-    let mut chars = html.chars().peekable();
+fn remove_tags_and_comments(html: &str) -> String {
+    let regex1 = Regex::new(r"<!--.*?-->").unwrap();
+    regex1.replace_all(html, "").to_string();
 
-    while let Some(&c) = chars.peek() {
-        if c == '<'
-            && chars.clone().nth(1) == Some('!')
-            && chars.clone().nth(2) == Some('-')
-            && chars.clone().nth(3) == Some('-')
-        {
-            while let Some(ch) = chars.next() {
-                if ch == '-'
-                    && chars.clone().peek() == Some(&'-')
-                    && chars.clone().nth(1) == Some('>')
-                {
-                    chars.next();
-                    chars.next();
-                    break;
-                }
-            }
-        } else {
-            result.push(c);
-            chars.next();
-        }
-    }
-
-    result
+    let regex2 = Regex::new(r"<[^>]*>").unwrap();
+    regex2.replace_all(html, "").to_string()
 }
 
-fn remove_tags(html: &str) -> String {
-    let mut result = String::with_capacity(html.len());
-    let mut inside_tag = false;
+fn isolate_content(html: &str) -> String {
+    let regex = Regex::new(r"(?s)<[^>]*>|[\s\t\r\n]+").unwrap();
+    let isolate_content = regex.replace_all(html, " ").to_string();
 
-    for c in html.chars() {
-        match c {
-            '<' => inside_tag = true,
-            '>' => inside_tag = false,
-            _ => {
-                if !inside_tag {
-                    result.push(c);
-                }
-            }
-        }
-    }
-
-    result
-}
-
-fn remove_css(html: &str) -> String {
-    let mut result = String::with_capacity(html.len());
-    let mut brace_depth = 0;
-
-    for c in html.chars() {
-        match c {
-            '{' => brace_depth += 1,
-            '}' => {
-                if brace_depth > 0 {
-                    brace_depth -= 1;
-                }
-            }
-            _ => {
-                if brace_depth == 0 {
-                    result.push(c);
-                }
-            }
-        }
-    }
-
-    result
+    isolate_content
 }
 
 fn clean_whitespace(html: &str) -> String {
     let mut result = String::with_capacity(html.len());
-    let mut last_was_space = true;
+    let mut last_was_space = false;
 
-    for c in html.chars() {
-        if c.is_whitespace() {
+    for c in html.bytes() {
+        if c.is_ascii_whitespace() {
             if !last_was_space {
                 result.push(' ');
                 last_was_space = true;
             }
         } else {
-            result.push(c);
+            result.push(c as char);
             last_was_space = false;
         }
     }

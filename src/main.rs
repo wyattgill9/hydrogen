@@ -22,7 +22,7 @@
 
 //}
 
-use hydrogen_common::models::{CleanedData, RawHtmlData};
+// use hydrogen_common::models::{CleanedData, RawHtmlData};
 use hydrogen_common::ring_buffer::LockFreeRingBuffer;
 use hydrogen_crawler::example::crawler;
 use hydrogen_ingestion::ingestor::ingest_data;
@@ -39,7 +39,7 @@ async fn main() {
     // Crawler (Producer)
     let crawler_buffer = Arc::clone(&raw_buffer);
     let crawler_handle = task::spawn(async move {
-        let url = "https://example.com";
+        let url = "https://www.amazon.com/";
         match crawler(url).await {
             Ok(raw_data) => {
                 if crawler_buffer.push(raw_data).is_err() {
@@ -72,7 +72,7 @@ async fn main() {
         loop {
             if let Some(html_data) = processing_buffer.pop() {
                 match cleaner::clean_data(html_data).await {
-                    Ok(CleanedData) => println!("Successfully cleaned data"),
+                    Ok(cleaned_data) => println!("Successfully cleaned data"),
                     Err(e) => eprintln!("Processing error: {}", e),
                 }
             } else {
