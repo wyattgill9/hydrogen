@@ -8,6 +8,7 @@ hydrogen_ingestion = { path = "crates/hydrogen_ingestion" }
 hydrogen_processing = { path = "crates/hydrogen_processing" }
 hydrogen_crawler = { path = "crates/hydrogen_crawler" }
 hydrogen_common = { path = "crates/hydrogen_common" }
+hydrogen_sink = { path = "crates/hydrogen_sink" }
 
 tokio = { version = "1.43.0", features = ["full"] }
 
@@ -17,6 +18,7 @@ members = [
     "crates/hydrogen_ingestion",
     "crates/hydrogen_processing",
     "crates/hydrogen_crawler", 
+    "crates/hydrogen_sink", 
 ]
 
 

@@ -407,6 +407,7 @@ dependencies = [
  "hydrogen_crawler",
  "hydrogen_ingestion",
  "hydrogen_processing",
+ "hydrogen_sink",
  "tokio",
 ]
 
@@ -440,8 +441,16 @@ dependencies = [
 name = "hydrogen_processing"
 version = "0.1.0"
 dependencies = [
+ "flate2",
  "hydrogen_common",
  "regex",
+]
+
+[[package]]
+name = "hydrogen_sink"
+version = "0.1.0"
+dependencies = [
+ "hydrogen_common",
 ]
 
 [[package]]

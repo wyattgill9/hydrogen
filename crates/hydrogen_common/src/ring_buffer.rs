@@ -10,7 +10,7 @@ pub struct LockFreeRingBuffer<T> {
 
 impl<T> LockFreeRingBuffer<T> {
     pub fn new(capacity: usize) -> Self {
-        // Ensure capacity is a power of 2 for efficient modulo operations
+        // Ensure capacity is a power of 2 for faster modulo operations
         let actual_capacity = capacity.next_power_of_two();
 
         LockFreeRingBuffer {
@@ -29,12 +29,10 @@ impl<T> LockFreeRingBuffer<T> {
         loop {
             let head = self.head.load(Ordering::Acquire);
 
-            // Check if buffer is full
             if tail.wrapping_sub(head) >= self.capacity {
                 return Err(item);
             }
 
-            // Try to update tail
             match self.tail.compare_exchange_weak(
                 tail,
                 tail.wrapping_add(1),
@@ -42,7 +40,6 @@ impl<T> LockFreeRingBuffer<T> {
                 Ordering::Relaxed,
             ) {
                 Ok(_) => {
-                    // Safe because we've claimed this slot
                     unsafe {
                         let slot = self.buffer[tail & (self.capacity - 1)].get();
                         *slot = Some(item);
@@ -60,12 +57,10 @@ impl<T> LockFreeRingBuffer<T> {
         loop {
             let tail = self.tail.load(Ordering::Acquire);
 
-            // Check if buffer is empty
             if head == tail {
                 return None;
             }
 
-            // Try to update head
             match self.head.compare_exchange_weak(
                 head,
                 head.wrapping_add(1),
@@ -73,7 +68,6 @@ impl<T> LockFreeRingBuffer<T> {
                 Ordering::Relaxed,
             ) {
                 Ok(_) => {
-                    // Safe because we've claimed this slot
                     unsafe {
                         let slot = self.buffer[head & (self.capacity - 1)].get();
                         // return (*slot).as_mut().map(|value| value.take()).flatten();
