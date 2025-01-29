@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::clone;
+// use std::clone;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RawHtmlData {
@@ -20,7 +20,7 @@ impl Default for RawHtmlData {
 
 impl From<CleanedData> for RawHtmlData {
     fn from(cleaned_data: CleanedData) -> Self {
-        // Convert CleanedData into RawHtmlData
+        // convert CleanedData to RawHtmlData
         RawHtmlData {
             source_url: cleaned_data.source_url,
             raw_html: cleaned_data.cleaned_html,
@@ -31,7 +31,7 @@ impl From<CleanedData> for RawHtmlData {
 
 impl From<RawHtmlData> for CleanedData {
     fn from(raw_data: RawHtmlData) -> Self {
-        // Convert RawHtmlData into CleanedData
+        // Convert raw to cleaned
         CleanedData {
             source_url: raw_data.source_url,
             cleaned_html: raw_data.raw_html,

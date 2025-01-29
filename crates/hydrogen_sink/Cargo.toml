@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 hydrogen_common = { path = "../hydrogen_common" }
+tokio = { version = "1", features = ["full"] }
+tokio-postgres = "0.7"
+dotenv = "0.15"    
+native-tls = "0.2"

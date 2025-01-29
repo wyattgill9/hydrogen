@@ -3,6 +3,7 @@ use hydrogen_common::ring_buffer::LockFreeRingBuffer;
 use hydrogen_crawler::example::crawler;
 use hydrogen_ingestion::ingestor::ingest_data;
 use hydrogen_processing::*;
+use hydrogen_sink::sink::sink_data;
 
 use std::sync::Arc;
 use tokio::time::{Duration, sleep};
@@ -13,7 +14,7 @@ pub async fn pipeline() {
 
     let crawler_buffer = Arc::clone(&raw_buffer);
     let crawler_handle = task::spawn(async move {
-        let url = "https://website.com";
+        let url = "https://example.com";
         match crawler(url).await {
             Ok(raw_data) => {
                 if crawler_buffer.push(raw_data).is_err() {
@@ -68,5 +69,24 @@ pub async fn pipeline() {
         }
     });
 
-    let _ = tokio::join!(crawler_handle, ingester_handle, processing_handle);
+    let sink_buffer = Arc::clone(&raw_buffer);
+    let sink_handle = task::spawn(async move {
+        loop {
+            if let Some(transformed_raw_data) = sink_buffer.pop() {  // Pop returns transformed_raw_data, not raw_data
+                match sink_data(transformed_raw_data).await {
+                    Ok(()) => {
+                        eprintln!("DONE, Sinked data from www.example.com");
+                        break;
+                    },
+                    Err(e) => {
+                        eprintln!("Error processing data: {}", e);
+                    }
+                }
+            } else {
+                sleep(Duration::from_millis(500)).await;
+            }
+        }
+    });
+
+    let _ = tokio::join!(crawler_handle, ingester_handle, processing_handle, sink_handle);
 }
