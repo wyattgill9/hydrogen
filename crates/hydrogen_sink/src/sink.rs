@@ -24,7 +24,7 @@ pub async fn sink_data(data: RawHtmlData) -> Result<(), Error> {
 
     client.execute(
         "INSERT INTO data (source_url, cleaned_html, timestamp) VALUES ($1, $2, $3)",
-        &[&cleaned_data.source_url, &cleaned_data.cleaned_html, &(timestamp as i64)]  // CAST the timestamp here
+        &[&cleaned_data.source_url, &cleaned_data.cleaned_html, &(timestamp as i64)] 
     ).await?;
 
     Ok(())
