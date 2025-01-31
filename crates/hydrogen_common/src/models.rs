@@ -40,7 +40,7 @@ impl From<RawHtmlData> for CleanedData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct CleanedData {
     pub source_url: String,
     pub cleaned_html: String,

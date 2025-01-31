@@ -7,3 +7,4 @@ edition = "2024"
 hydrogen_common = { path = "../hydrogen_common" }
 regex = "1.11"
 flate2 = "1.0"
+scraper = "0.22.0"

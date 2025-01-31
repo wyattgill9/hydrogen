@@ -1,36 +1,24 @@
 use hydrogen_common::models::{CleanedData, RawHtmlData};
-use regex::Regex;
+use scraper::{Html, Selector};
 
 pub async fn clean_data(raw_data: RawHtmlData) -> Result<CleanedData, Box<dyn std::error::Error>> {
-    let cleaned_html = RegexCleaner::new()
-        .clean(&raw_data.raw_html)
-        .finalize();
+    let document = Html::parse_document(&raw_data.raw_html);
+
+    let body_selector =
+        Selector::parse("body").unwrap_or_else(|_| Selector::parse("html").unwrap());
+
+    let cleaned_html = document
+        .select(&body_selector)
+        .map(|element| element.text().collect::<Vec<_>>().join(" "))
+        .collect::<Vec<_>>()
+        .join("\n")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
 
     Ok(CleanedData {
         source_url: raw_data.source_url,
         cleaned_html,
         timestamp: raw_data.timestamp,
     })
-}
-
-struct RegexCleaner {
-    data: String,
-}
-
-impl RegexCleaner {
-    fn new() -> Self {
-        Self {
-            data: String::new(),
-        }
-    }
-
-    fn clean(mut self, input: &str) -> Self {
-        println!("Cleaning data: {}", input);
-        self
-    }
-
-
-    fn finalize(self) -> String {
-        self.data
-    }
 }

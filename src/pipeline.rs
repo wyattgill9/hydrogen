@@ -1,4 +1,4 @@
-use hydrogen_common::models::RawHtmlData;
+use hydrogen_common::models::{CleanedData, RawHtmlData};
 use hydrogen_common::ring_buffer::LockFreeRingBuffer;
 use hydrogen_crawler::example::crawler;
 use hydrogen_ingestion::ingestor::ingest_data;
@@ -11,6 +11,7 @@ use tokio::{self, task};
 
 pub async fn pipeline() {
     let raw_buffer = Arc::new(LockFreeRingBuffer::<RawHtmlData>::new(100));
+    let clean_buffer = Arc::new(LockFreeRingBuffer::<CleanedData>::new(100));
 
     let crawler_buffer = Arc::clone(&raw_buffer);
     let crawler_handle = task::spawn(async move {
@@ -40,28 +41,19 @@ pub async fn pipeline() {
     });
 
     // Processing
-    let processing_buffer = Arc::clone(&raw_buffer);
+    let raw_processing_buffer = Arc::clone(&raw_buffer);
+    let clean_processing_buffer = Arc::clone(&clean_buffer);
     let processing_handle = task::spawn(async move {
         loop {
-            if let Some(html_data) = processing_buffer.pop() {
+            if let Some(html_data) = raw_processing_buffer.pop() {
                 let cleaned_data = cleaner::clean_data(html_data).await.unwrap();
-                println!("Cleaned HTML");
 
                 let reduced_data = reduction::reduce(cleaned_data).await.unwrap();
-                println!("Reduced HTML");
 
-                match transform::transform(reduced_data).await {
-                    Ok(transformed_data) => {
-                        let transformed_raw_data: RawHtmlData = transformed_data.into(); // Convert CleanedData to RawHtmlData
-                        println!("Successfully Transformed data");
+                let transformed_data = transform::transform(reduced_data).await.unwrap();
 
-                        if processing_buffer.push(transformed_raw_data.into()).is_err() {
-                            eprintln!("Processing buffer is full");
-                        }
-
-                        break;
-                    }
-                    Err(e) => eprintln!("Processing error: {}", e),
+                if clean_processing_buffer.push(transformed_data).is_err() {
+                    eprintln!("Processing buffer is full, dropping transformed data");
                 }
             } else {
                 sleep(Duration::from_millis(500)).await;
@@ -69,17 +61,19 @@ pub async fn pipeline() {
         }
     });
 
-    let sink_buffer = Arc::clone(&raw_buffer);
+    let sink_buffer = Arc::clone(&clean_buffer);
     let sink_handle = task::spawn(async move {
         loop {
-            if let Some(transformed_raw_data) = sink_buffer.pop() {  // Pop returns transformed_raw_data, not raw_data
-                match sink_data(transformed_raw_data).await {
+            if let Some(processed_data) = sink_buffer.pop() {
+                match sink_data(&processed_data).await {
                     Ok(()) => {
-                        eprintln!("DONE, Sinked data from www.example.com");
+                        eprintln!("DONE, Sinked Data from {}", processed_data.source_url);
+                        eprintln!("{:?}", processed_data);
                         break;
-                    },
+                    }
                     Err(e) => {
                         eprintln!("Error processing data: {}", e);
+                        eprintln!(" FAILED: Sinking Data from {:?}", processed_data);
                     }
                 }
             } else {
@@ -88,5 +82,10 @@ pub async fn pipeline() {
         }
     });
 
-    let _ = tokio::join!(crawler_handle, ingester_handle, processing_handle, sink_handle);
+    let _ = tokio::join!(
+        crawler_handle,
+        ingester_handle,
+        processing_handle,
+        sink_handle
+    );
 }

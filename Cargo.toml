@@ -11,6 +11,7 @@ hydrogen_common = { path = "crates/hydrogen_common" }
 hydrogen_sink = { path = "crates/hydrogen_sink" }
 
 tokio = { version = "1.43.0", features = ["full"] }
+scraper = "0.22.0"
 
 [workspace]
 members = [ 
