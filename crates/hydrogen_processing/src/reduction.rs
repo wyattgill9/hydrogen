@@ -27,6 +27,5 @@ pub async fn reduce(mut data: CleanedData) -> Result<CleanedData, Box<dyn std::e
 
     data.cleaned_html = unique_words.join(" ");
 
-    println!("Reduced text: {}", data.cleaned_html);
     Ok(data)
 }
